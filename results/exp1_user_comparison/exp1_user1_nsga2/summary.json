@@ -1,0 +1,11 @@
+{
+  "label": "exp1_user1_nsga2",
+  "algorithm": "nsga2",
+  "user_id": 1,
+  "pop_size": 20,
+  "n_gen": 10,
+  "alpha": 0.5,
+  "final_hv": 67556.13020455271,
+  "front_size": 20,
+  "elapsed_s": 0.09
+}
