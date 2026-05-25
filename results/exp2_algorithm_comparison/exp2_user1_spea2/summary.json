@@ -2,10 +2,10 @@
   "label": "exp2_user1_spea2",
   "algorithm": "spea2",
   "user_id": 1,
-  "pop_size": 20,
-  "n_gen": 10,
+  "pop_size": 100,
+  "n_gen": 200,
   "alpha": 0.5,
-  "final_hv": 96902.57026379077,
-  "front_size": 26,
-  "elapsed_s": 0.1
+  "final_hv": 292711.5445538478,
+  "front_size": 107,
+  "elapsed_s": 9.37
 }

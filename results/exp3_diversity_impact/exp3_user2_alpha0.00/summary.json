@@ -2,10 +2,10 @@
   "label": "exp3_user2_alpha0.00",
   "algorithm": "nsga2",
   "user_id": 2,
-  "pop_size": 20,
-  "n_gen": 10,
+  "pop_size": 100,
+  "n_gen": 200,
   "alpha": 0.0,
-  "final_hv": 123588.7880218102,
-  "front_size": 20,
-  "elapsed_s": 0.09
+  "final_hv": 291016.9262045481,
+  "front_size": 100,
+  "elapsed_s": 9.97
 }
