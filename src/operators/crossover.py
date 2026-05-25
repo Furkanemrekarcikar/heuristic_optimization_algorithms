@@ -7,11 +7,16 @@ Why OX over PMX:
   decoder where position encodes priority.
 
 Permutation invariant:
-  offspring_breakfast  = permutation of parent1's breakfast IDs
-  offspring_lunch      = permutation of parent1's lunch+dinner IDs
-  → offspring is a valid permutation of 0..404 as long as parent1 is.
+  offspring1_breakfast  = permutation of c1's breakfast IDs
+  offspring1_lunch      = permutation of c1's lunch+dinner IDs
+  → offspring1 is a valid permutation of 0..404. Same for offspring2/c2.
 
-Two offspring are produced per call (parent roles are swapped for child 2).
+Filler projection:
+  Each chromosome half may hold a DIFFERENT set of food IDs, so we cannot
+  feed c2's breakfast array directly as the filler for c1's breakfast OX.
+  Instead we project: extract c2's elements that belong to c1's half (in c2's
+  original order). This guarantees donor and filler always share the same
+  element set, which is the precondition for OX correctness.
 """
 
 from __future__ import annotations
@@ -36,42 +41,43 @@ def crossover(
 
     s = cfg.BREAKFAST_SIZE
 
-    b1, b2 = _ox(c1[:s],  c2[:s])
-    l1, l2 = _ox(c1[s:],  c2[s:])
+    # Project each parent's full chromosome onto the OTHER parent's ID sets
+    # so that donor and filler always contain exactly the same elements.
+    b1 = _ox_part(c1[:s], c2[np.isin(c2, c1[:s])])   # child1 breakfast
+    l1 = _ox_part(c1[s:], c2[np.isin(c2, c1[s:])])   # child1 lunch+dinner
+    b2 = _ox_part(c2[:s], c1[np.isin(c1, c2[:s])])   # child2 breakfast
+    l2 = _ox_part(c2[s:], c1[np.isin(c1, c2[s:])])   # child2 lunch+dinner
 
     return np.concatenate([b1, l1]), np.concatenate([b2, l2])
 
 
 # ── Internal ──────────────────────────────────────────────────────────────────
 
-def _ox(p1: np.ndarray, p2: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Standard OX on two permutation arrays of the same length.
-    Returns two offspring.
-    """
-    n = len(p1)
+def _ox_part(donor: np.ndarray, filler: np.ndarray) -> np.ndarray:
+    """OX on a single part; donor and filler must share the same element set."""
+    n = len(donor)
     a, b = sorted(np.random.choice(n, 2, replace=False))
-    return _ox_one(p1, p2, a, b), _ox_one(p2, p1, a, b)
+    return _ox_one(donor, filler, a, b)
 
 
 def _ox_one(donor: np.ndarray, filler: np.ndarray, a: int, b: int) -> np.ndarray:
     """
     Single OX offspring:
       1. Copy donor[a:b] into the same positions.
-      2. Fill remaining slots (left to right from position b, wrapping)
-         with elements from filler in order, skipping already-placed ones.
+      2. Fill remaining slots (left to right from b, wrapping)
+         with filler elements not already placed.
     """
     n = len(donor)
-    child    = np.empty(n, dtype=donor.dtype)
+    child      = np.empty(n, dtype=donor.dtype)
     child[a:b] = donor[a:b]
-    placed   = set(donor[a:b].tolist())
+    placed     = set(donor[a:b].tolist())
 
-    write = b % n
+    write = b
     for offset in range(n):
         val = filler[(b + offset) % n]
         if val not in placed:
-            child[write] = val
+            child[write % n] = val
             placed.add(val)
-            write = (write + 1) % n
+            write += 1
 
     return child
