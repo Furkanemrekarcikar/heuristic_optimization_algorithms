@@ -48,9 +48,9 @@ cp .env.example .env
 ```env
 DB_HOST=localhost
 DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=         # XAMPP varsayılan şifresi boştur; değiştirdiyseniz buraya yazın
-DB_NAME=diet
+DB_USER=your_user_name_here
+DB_PASSWORD=your_password_here
+DB_NAME=your_db_name_here
 ```
 
 > `.env` dosyası `.gitignore` kapsamındadır — commit'e **girmez**.
