@@ -8,8 +8,8 @@ DB_NAME     = "diet"
 # ── Project users ─────────────────────────────────────────────────────────────
 # Run `python scripts/list_users.py` to see all user IDs in the database,
 # then set the correct IDs for the non-vegetarian (User 1) and vegetarian (User 2).
-USER1_ID = 4    # Non-vegetarian
-USER2_ID = 5    # Vegetarian
+USER1_ID = 1    # Non-vegetarian
+USER2_ID = 2   # Vegetarian
 
 # ── Nutritional constraint nutrient IDs (from `nutrients` table) ──────────────
 # C1=Energy(5), C2=Protein(15), C3=Carbohydrate(8), C4=Fiber(4), C5=Sodium(17)
