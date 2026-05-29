@@ -95,6 +95,8 @@ def decode(chromosome: np.ndarray, ds: DataStore) -> DecodedMenu:
     b_ep   = np.zeros(2, dtype=np.float64)  # running Energy + Protein totals
 
     for idx in b_genes:
+        if ds.preferences[idx] < 0:
+            continue
         ep = ds.nutrient_matrix[idx, :2]
         if np.any(b_ep + ep > rul_b):
             continue
@@ -115,6 +117,8 @@ def decode(chromosome: np.ndarray, ds: DataStore) -> DecodedMenu:
     ld_mask = np.zeros(n, dtype=bool)
 
     for idx in ld_genes:
+        if ds.preferences[idx] < 0:
+            continue
         nuts = ds.nutrient_matrix[idx]
         if np.any(daily_totals + nuts > rul_d):
             continue

@@ -81,7 +81,11 @@ def estimate_shared_hv_ref(
     Estimate a shared HV reference point for an experiment.
 
     Samples `n_samples` random chromosomes from each DataStore, evaluates raw
-    objectives, and returns  max_over_all_samples * 1.1 + 1e-6.
+    objectives, and returns  worst + 10% absolute margin + 1e-6.
+
+    Additive margin (not multiplicative) is used so that negative objectives
+    (f1 = -preference) get a reference point that is correctly *larger* (worse),
+    not more-negative (better).
 
     Using the same reference point across all algorithms ensures HV values
     are directly comparable (required by the project handout).
@@ -92,8 +96,10 @@ def estimate_shared_hv_ref(
             chrom = random_chromosome(ds.n_foods)
             menu  = decode(chrom, ds)
             all_obj.append(compute_objectives(menu, ds))
-    arr = np.array(all_obj)
-    return arr.max(axis=0) * 1.1 + 1e-6
+    arr    = np.array(all_obj)
+    worst  = arr.max(axis=0)
+    margin = 0.10 * np.maximum(np.abs(worst), 1.0)
+    return worst + margin + 1e-6
 
 
 def run_single(
