@@ -96,9 +96,9 @@ def main():
     if errors:
         print(f"\nErrors ({len(errors)}):")
         for e in set(errors):
-            print(f"  ✗ {e}")
+            print(f"  -- {e}")
     else:
-        print("\nAll checks passed ✓")
+        print("\nAll checks passed OK")
 
 
 if __name__ == "__main__":

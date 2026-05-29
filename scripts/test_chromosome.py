@@ -31,7 +31,7 @@ def compliance_str(totals, rll, rul):
         lo = rll[j] * cfg.EPS_LOWER
         hi = rul[j] * cfg.EPS_UPPER
         ok = lo <= totals[j] <= hi
-        parts.append("✓" if ok else "✗")
+        parts.append("OK" if ok else "--")
     return " ".join(parts)
 
 
@@ -46,7 +46,7 @@ def print_menu_summary(idx, menu, ds, objs):
     for j, name in enumerate(NUTRIENT_LABELS):
         lo = ds.dri_rll[j] * cfg.EPS_LOWER
         hi = ds.dri_rul[j] * cfg.EPS_UPPER
-        ok = "✓" if lo <= totals[j] <= hi else "✗"
+        ok = "OK" if lo <= totals[j] <= hi else "--"
         print(f"      {ok} {name:<16} {totals[j]:>8.2f}  [{lo:.2f}, {hi:.2f}]")
     print(f"    Objectives:  preference={-objs[0]:.2f}  cost={objs[1]:.2f}  co2={objs[2]:.2f}")
 

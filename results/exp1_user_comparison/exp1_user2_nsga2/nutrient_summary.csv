@@ -1,0 +1,11 @@
+solution,nutrient,total,RLL,RUL,within_bounds,pct_of_RLL
+Most Preferred,Energy (kcal),2341.36,2000.0,2400.0,True,117.1
+Most Preferred,Protein (g),58.67,40.0,100.0,True,146.7
+Most Preferred,Carbohydrate (g),344.93,170.0,300.0,False,202.9
+Most Preferred,Fiber (g),17.52,20.0,9999.0,False,87.6
+Most Preferred,Sodium (mg),2315.63,1500.0,2300.0,False,154.4
+Cheapest,Energy (kcal),839.75,2000.0,2400.0,False,42.0
+Cheapest,Protein (g),14.27,40.0,100.0,False,35.7
+Cheapest,Carbohydrate (g),453.33,170.0,300.0,False,266.7
+Cheapest,Fiber (g),0.57,20.0,9999.0,False,2.9
+Cheapest,Sodium (mg),32.86,1500.0,2300.0,False,2.2

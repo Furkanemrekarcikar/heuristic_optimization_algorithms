@@ -29,7 +29,7 @@ def main():
     db = DBConnection(cfg.DB_HOST, cfg.DB_PORT, cfg.DB_USER, cfg.DB_PASSWORD, cfg.DB_NAME)
     ds = load_data(db, cfg.USER1_ID)
 
-    print(f"\nPenalty test — User 1 (λ={cfg.LAMBDA_PENALTY}, α={cfg.ALPHA_DIVERSITY})")
+    print(f"\nPenalty test — User 1 (lambda={cfg.LAMBDA_PENALTY}, alpha={cfg.ALPHA_DIVERSITY})")
     print(f"{'#':>2}  {'R_dri':>7}  {'R_div':>7}  {'R_tot':>7}  "
           f"{'Groups':>6}  {'pref_raw':>9}  {'pref_pen':>9}  feasible")
     print("-" * 75)
@@ -52,12 +52,12 @@ def main():
         print(
             f"{i+1:>2}  {R_dri:>7.4f}  {R_div:>7.4f}  {R_tot:>7.4f}  "
             f"{n_groups:>6}  {-objs[0]:>9.2f}  {-pen_objs[0]:>9.2f}  "
-            f"{'✓' if feasible else '✗'}"
+            f"{'OK' if feasible else '--'}"
         )
 
     print(f"\nFeasible (R_dri=0): {n_feasible}/{N}")
     print(f"Diversity range: {cfg.ALPHA_DIVERSITY:.2f}/n_groups  "
-          f"(target ≥4 groups → R_div ≤ {cfg.ALPHA_DIVERSITY/4:.4f})")
+          f"(target >=4 groups -> R_div <= {cfg.ALPHA_DIVERSITY/4:.4f})")
 
 
 if __name__ == "__main__":
