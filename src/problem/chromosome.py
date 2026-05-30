@@ -9,7 +9,9 @@ split at position BREAKFAST_SIZE into two independent parts:
     [ idx_0, idx_1, ..., idx_93  |  idx_94, ..., idx_404 ]
       <──── breakfast (94) ──────>  <──── lunch+dinner (311) ────>
 
-The same food ID appears at most once across the full chromosome.
+The DB loads foods ORDER BY f.id; IDs 1..94 are breakfast foods (indices 0..93)
+and IDs 95..405 are lunch+dinner foods (indices 94..404). Both parts are
+shuffled independently so each part only ever contains its own food type.
 
 Decoding (greedy, left-to-right)
 ---------------------------------
@@ -36,6 +38,16 @@ from ..database.loader import DataStore
 from .. import config as cfg
 
 
+# Food groups that are non-vegetarian and must be skipped for vegetarian users.
+# Group 2 (Chicken Products) is excluded because it contains eggs.
+_NON_VEG_GROUP_IDS: frozenset[int] = frozenset({
+    3,   # Meat Products
+    15,  # Chicken and Turkey based dishes
+    23,  # Fish
+    28,  # Meat based dishes
+})
+
+
 # ── Return type ───────────────────────────────────────────────────────────────
 
 class DecodedMenu(NamedTuple):
@@ -48,17 +60,19 @@ class DecodedMenu(NamedTuple):
 
 def random_chromosome(n_foods: int = cfg.TOTAL_FOODS) -> np.ndarray:
     """
-    Generate a random chromosome: a permutation of 0..n_foods-1.
-    The first BREAKFAST_SIZE elements form the breakfast part;
-    the rest form the lunch+dinner part.
-    Both parts are shuffled independently so the initial ordering within
-    each part is unbiased.
+    Generate a random chromosome with two independently shuffled parts.
+
+    Breakfast part  : a permutation of indices 0..BREAKFAST_SIZE-1
+                      (DB food IDs 1..94 — actual breakfast foods)
+    Lunch+dinner part: a permutation of indices BREAKFAST_SIZE..n_foods-1
+                      (DB food IDs 95..405 — actual lunch+dinner foods)
+
+    Keeping each part within its own index range ensures the decoder only
+    evaluates breakfast foods during the breakfast phase and vice versa.
     """
-    perm = np.random.permutation(n_foods)
-    # Shuffle each part independently (already random, but explicit for clarity)
-    np.random.shuffle(perm[:cfg.BREAKFAST_SIZE])
-    np.random.shuffle(perm[cfg.BREAKFAST_SIZE:])
-    return perm
+    breakfast_part    = np.random.permutation(np.arange(0, cfg.BREAKFAST_SIZE))
+    lunch_dinner_part = np.random.permutation(np.arange(cfg.BREAKFAST_SIZE, n_foods))
+    return np.concatenate([breakfast_part, lunch_dinner_part])
 
 
 def decode(chromosome: np.ndarray, ds: DataStore) -> DecodedMenu:
@@ -95,7 +109,7 @@ def decode(chromosome: np.ndarray, ds: DataStore) -> DecodedMenu:
     b_ep   = np.zeros(2, dtype=np.float64)  # running Energy + Protein totals
 
     for idx in b_genes:
-        if ds.preferences[idx] < 0:
+        if _skip(ds, idx):
             continue
         ep = ds.nutrient_matrix[idx, :2]
         if np.any(b_ep + ep > rul_b):
@@ -117,7 +131,7 @@ def decode(chromosome: np.ndarray, ds: DataStore) -> DecodedMenu:
     ld_mask = np.zeros(n, dtype=bool)
 
     for idx in ld_genes:
-        if ds.preferences[idx] < 0:
+        if _skip(ds, idx):
             continue
         nuts = ds.nutrient_matrix[idx]
         if np.any(daily_totals + nuts > rul_d):
@@ -128,3 +142,16 @@ def decode(chromosome: np.ndarray, ds: DataStore) -> DecodedMenu:
             break
 
     return DecodedMenu(b_mask, ld_mask, daily_totals)
+
+
+# ── Internal helpers ──────────────────────────────────────────────────────────
+
+def _skip(ds: DataStore, idx: int) -> bool:
+    """Return True if this food should be skipped during decoding."""
+    if ds.preferences[idx] < 0:
+        return True
+    # DB data is inconsistent for User 2: some non-veg foods have positive
+    # preference. Group-based filter catches meat/fish that slipped through.
+    if int(ds.food_group_ids[idx]) in _NON_VEG_GROUP_IDS:
+        return ds.user_id == cfg.USER2_ID
+    return False
